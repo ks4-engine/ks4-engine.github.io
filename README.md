@@ -6,9 +6,9 @@ Step 2: Change the custom domain and make sure its named [username-or-org].githu
 Step 3: Customize the HTML files to whatever you want and change mirrors to your engine
 Step 4: Make checksums for your .PMP files for validating sources
 # Making File Hashes
-Windows:
+- Windows:
 ```Get-FileHash yourproject.pmp -Algorithm SHA256 | Out-File yourproject.pmp.sha256```
-Linux:
+- Linux:
 ```
 sha256sum myfile.txt > myfile.txt.sha256
 sha256sum -c myfile.txt.sha256
