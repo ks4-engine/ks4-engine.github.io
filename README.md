@@ -1,6 +1,6 @@
 # The Official KS4 Engine Website
 This is the official KS4 Engine Website. Here you will find these STINKY INSTRUCTIONS on self-hosting it, and what it is for.
-## How to self host This Site
+## How to Self Host This Website
 Step 1: Fork this repo
 Step 2: Change the custom domain and make sure its named [username-or-org].github.io, or you can use the default github domain if you dont have a domain
 Step 3: Customize the HTML files to whatever you want and change mirrors to your engine
