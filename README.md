@@ -7,7 +7,9 @@ Step 3: Customize the HTML files to whatever you want and change mirrors to your
 Step 4: Make checksums for your .PMP files for validating sources
 # Making File Hashes
 - Windows:
-```Get-FileHash yourproject.pmp -Algorithm SHA256 | Out-File yourproject.pmp.sha256```
+```
+Get-FileHash yourproject.pmp -Algorithm SHA256 | Out-File yourproject.pmp.sha256
+```
 - Linux:
 ```
 sha256sum myfile.txt > myfile.txt.sha256
