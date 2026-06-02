@@ -1,1 +1,230 @@
-bro
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KS4 Engine Comments</title>
+    <link rel="canonical" href="/comments">
+    <meta property="og:title" content="KS4 Engine Comments">
+    <meta property="og:image" content="/img/ks4-engine-thumbnail.png">
+    <meta property="og:description" content="Leave a comment on KS4 Engine!">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://ks4.dev/style-thing.css">
+    <style>
+        .comment-form {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 480px;
+        }
+
+        .comment-form label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .comment-form input[type="text"],
+        .comment-form textarea {
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.4rem 0.6rem;
+            width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.25rem;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.1s;
+        }
+
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f5c518;
+        }
+
+        .submit-btn {
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .status-msg {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            min-height: 1.2em;
+        }
+
+        .status-msg.error { color: #c0392b; }
+        .status-msg.success { color: #27ae60; }
+
+        .comments-list h2 {
+            margin-bottom: 0.25rem;
+        }
+
+        .comments-list p {
+            margin-top: 0;
+        }
+
+        .loading-msg {
+            font-family: 'JetBrains Mono', monospace;
+            font-style: italic;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-links">
+        <a href="mirrors">download</a>
+        <a href="https://drakeraz09.itch.io/ks4">itch.io</a>
+        <a href="/mirrors/ks4-engine-v0.561.html">playtest</a>
+        <a href="mirrors">home</a>
+        <button id="darkModeToggle" type="button">Toggle Dark Mode</button>
+    </div>
+
+    <main>
+        <h1>KS4 Engine Comments</h1>
+        <img src="https://ks4.dev/img/ks4-engine-thumbnail.png" alt="bottom art" class="bottom-image">
+
+        <div class="comments-list" id="commentsList">
+            <p class="loading-msg">Loading comments...</p>
+        </div>
+
+        <h1>Make your own comment!</h1>
+
+        <div class="comment-form">
+            <label for="nickname">Name to display:</label>
+            <input type="text" id="nickname" placeholder="Jane-Doe" maxlength="32">
+
+            <label for="commentContent">Comment:</label>
+            <textarea id="commentContent" rows="4" placeholder="What do you think of KS4 Engine?" maxlength="500"></textarea>
+
+            <label>Rating:</label>
+            <div class="star-rating">
+                <input type="radio" id="star5" name="rating" value="5">
+                <label for="star5" title="5 stars">&#9733;</label>
+                <input type="radio" id="star4" name="rating" value="4">
+                <label for="star4" title="4 stars">&#9733;</label>
+                <input type="radio" id="star3" name="rating" value="3">
+                <label for="star3" title="3 stars">&#9733;</label>
+                <input type="radio" id="star2" name="rating" value="2">
+                <label for="star2" title="2 stars">&#9733;</label>
+                <input type="radio" id="star1" name="rating" value="1">
+                <label for="star1" title="1 star">&#9733;</label>
+            </div>
+
+            <div class="g-recaptcha" data-sitekey="6Lc8uAktAAAAAJDHmtX3z2snZsdH-anNHPXCFh2X"></div>
+
+            <button class="submit-btn" id="submitBtn" type="button">Submit Comment</button>
+            <p class="status-msg" id="statusMsg"></p>
+        </div>
+    </main>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        const toggleButton = document.getElementById("darkModeToggle");
+        const pageBody = document.body;
+        const pageMain = document.querySelector("main");
+
+        toggleButton.addEventListener("click", () => {
+            pageBody.classList.toggle("dark-mode");
+            pageMain.classList.toggle("dark-mode");
+        });
+
+        async function loadComments() {
+            const list = document.getElementById("commentsList");
+            try {
+                const res = await fetch("https://api.ks4.dev/comments");
+                const comments = await res.json();
+
+                if (!comments.length) {
+                    list.innerHTML = "<p>No comments yet. Be the first!</p>";
+                    return;
+                }
+
+                list.innerHTML = comments.map(c => {
+                    const displayName = c.nickname.replace(/-/g, " ");
+                    return `<h2>${displayName} (Rating: ${c.rating}/5)</h2><p>${c.commentContent}</p>`;
+                }).join("");
+            } catch {
+                list.innerHTML = "<p>Could not load comments right now.</p>";
+            }
+        }
+
+        loadComments();
+
+        document.getElementById("submitBtn").addEventListener("click", async () => {
+            const nickname = document.getElementById("nickname").value.trim();
+            const commentContent = document.getElementById("commentContent").value.trim();
+            const ratingInput = document.querySelector('input[name="rating"]:checked');
+            const statusMsg = document.getElementById("statusMsg");
+
+            statusMsg.className = "status-msg";
+            statusMsg.textContent = "";
+
+            if (!nickname || !commentContent || !ratingInput) {
+                statusMsg.className = "status-msg error";
+                statusMsg.textContent = "Please fill out all fields and pick a rating.";
+                return;
+            }
+
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                statusMsg.className = "status-msg error";
+                statusMsg.textContent = "Please complete the reCAPTCHA.";
+                return;
+            }
+
+            const payload = {
+                nickname,
+                commentContent,
+                rating: ratingInput.value,
+                recaptchaToken: recaptchaResponse
+            };
+
+            try {
+                const res = await fetch("https://api.ks4.dev/comments", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    statusMsg.className = "status-msg success";
+                    statusMsg.textContent = "Comment submitted! Thanks :)";
+                    document.getElementById("nickname").value = "";
+                    document.getElementById("commentContent").value = "";
+                    ratingInput.checked = false;
+                    grecaptcha.reset();
+                    loadComments();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    statusMsg.className = "status-msg error";
+                    statusMsg.textContent = err.message || "Something went wrong. Try again.";
+                }
+            } catch {
+                statusMsg.className = "status-msg error";
+                statusMsg.textContent = "Network error. Check your connection.";
+            }
+        });
+    </script>
+</body>
+</html>
