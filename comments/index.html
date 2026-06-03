@@ -150,25 +150,41 @@
             pageMain.classList.toggle("dark-mode");
         });
 
-        async function loadComments() {
-            const list = document.getElementById("commentsList");
-            try {
-                const res = await fetch("https://api.ks4.dev/comments");
-                const comments = await res.json();
+async function loadComments() {
+    const list = document.getElementById("commentsList");
 
-                if (!comments.length) {
-                    list.innerHTML = "<p>No comments yet. Be the first!</p>";
-                    return;
-                }
+    try {
+        const res = await fetch("https://api.ks4.dev/comments");
+        const comments = await res.json();
 
-                list.innerHTML = comments.map(c => {
-                    const displayName = c.nickname.replace(/-/g, " ");
-                    return `<h2>${displayName} (Rating: ${c.rating}/5)</h2><p>${c.commentContent}</p>`;
-                }).join("");
-            } catch {
-                list.innerHTML = "<p>Could not load comments right now.</p>";
-            }
+        list.innerHTML = "";
+
+        if (!comments.length) {
+            const p = document.createElement("p");
+            p.innerText = "No comments yet. Be the first!";
+            list.appendChild(p);
+            return;
         }
+
+        comments.forEach(c => {
+            const displayName = c.nickname.replace(/-/g, " ");
+
+            const heading = document.createElement("h2");
+            heading.innerText = `${displayName} (Rating: ${c.rating}/5)`;
+            const comment = document.createElement("p");
+            comment.innerText = c.commentContent;
+
+            list.appendChild(heading);
+            list.appendChild(comment);
+        });
+    } catch {
+        list.innerHTML = "";
+
+        const p = document.createElement("p");
+        p.innerText = "Could not load comments right now.";
+        list.appendChild(p);
+    }
+}
 
         loadComments();
 
